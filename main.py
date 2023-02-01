@@ -1,10 +1,19 @@
 import requests as r
+import json
 import csv
 
 url = "https://data.cityofchicago.org/resource/ijzp-q8t2.json?year=2022"
 
 response = r.get(url)
 data = response.json()
+
+
+def write_json(row, columns):
+    full_dict = {row[0]: {}}
+    for ro, c in zip(row, columns):
+        full_dict[row[0]][c] = ro
+    with open("crimes_data.json", 'a', encoding='utf-8') as f:
+        f.write(json.dumps(full_dict, indent=4))
 
 
 def write_csv(data):
@@ -30,6 +39,7 @@ def write_csv(data):
                     for inner_value in value.values():
                         row.append(inner_value)
             writer.writerow(row)
+            write_json(row, columns)
 
 
 if __name__ == "__main__":
