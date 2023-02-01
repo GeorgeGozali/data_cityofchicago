@@ -1,6 +1,7 @@
 import requests as r
 import json
 import csv
+import pandas as pd
 
 URL = "https://data.cityofchicago.org/resource/ijzp-q8t2.json?year=2022"
 
@@ -39,7 +40,16 @@ def write_csv(data):
             write_json(row, columns)
 
 
+def pd_write_primary_types():
+    df = pd.read_csv("crimes_data.csv")
+    primary_types = df['primary_type'].unique()
+    for pr_type in primary_types:
+        df = df[df['primary_type'] == f"{pr_type}"]
+        df.to_csv(f"{pr_type.lower()}.csv", encoding='utf-8', index=False)
+
+
 if __name__ == "__main__":
     response = r.get(URL)
     response_data = response.json()
     write_csv(response_data)
+    pd_write_primary_types()
