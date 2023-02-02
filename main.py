@@ -7,10 +7,10 @@ import calendar
 URL = "https://data.cityofchicago.org/resource/ijzp-q8t2.json?year=2022"
 
 
-def write_json(row: list[str], columns) -> None:
-    full_dict = {row[0]: {}}
-    for ro, c in zip(row, columns):
-        full_dict[row[0]][c] = ro
+def write_json(rows_list: list[str], columns_list) -> None:
+    full_dict = {rows_list[0]: {}}
+    for row, column in zip(rows_list, columns_list):
+        full_dict[rows_list[0]][column] = row
     with open("crimes_data.json", 'a', encoding='utf-8') as f:
         f.write(json.dumps(full_dict, indent=4))
 
