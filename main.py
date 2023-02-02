@@ -1,8 +1,8 @@
-import requests as r
-import json
-import csv
-import pandas as pd
 import calendar
+import csv
+import json
+import pandas as pd
+import requests as r
 
 URL = "https://data.cityofchicago.org/resource/ijzp-q8t2.json?year=2022"
 
@@ -11,17 +11,15 @@ def write_json(rows_list: list[str], columns_list) -> None:
     full_dict = {rows_list[0]: {}}
     for row, column in zip(rows_list, columns_list):
         full_dict[rows_list[0]][column] = row
-    with open("crimes_data.json", 'a', encoding='utf-8') as f:
+    with open("crimes_data.json", "a", encoding="utf-8") as f:
         f.write(json.dumps(full_dict, indent=4))
 
 
 def write_csv(data) -> None:
     columns_list = []
-    for item in data:
-        if len(item) == 22:
-            columns_list = item.keys()
+    columns_list = max(data, key=len).keys()
 
-    with open('crimes_data.csv', 'w') as file:
+    with open("crimes_data.csv", "w") as file:
         writer = csv.writer(file)
         writer.writerow(columns_list)
         for item in data:
@@ -38,20 +36,22 @@ def write_csv(data) -> None:
 
 def pd_write_primary_types() -> None:
     df = pd.read_csv("crimes_data.csv")
-    primary_types = df['primary_type'].unique()
+    primary_types = df["primary_type"].unique()
     for pr_type in primary_types:
-        new_df = df[df['primary_type'] == f"{pr_type}"]
-        new_df.to_csv(f"{pr_type.lower()}.csv", encoding='utf-8', index=False)
+        new_df = df[df["primary_type"] == f"{pr_type}"]
+        new_df.to_csv(f"{pr_type.lower()}.csv", encoding="utf-8", index=False)
 
 
 def write_crime_for_months() -> None:
-    df = pd.read_csv("crimes_data.csv", parse_dates=['date'])
-    df['date'] = pd.to_datetime(df['date'])
+    df = pd.read_csv("crimes_data.csv", parse_dates=["date"])
+    df["date"] = pd.to_datetime(df["date"])
     data_dict = {}
     months = [num for num in range(1, 13)]
     for month in months:
         try:
-            crime_types_num = df[df['date'].dt.month == month]['primary_type'].value_counts()
+            crime_types_num = df[df["date"].dt.month == month][
+                "primary_type"
+            ].value_counts()
             crime_type = crime_types_num.keys()[0]
             crime_number = crime_types_num[crime_type]
         except IndexError:
