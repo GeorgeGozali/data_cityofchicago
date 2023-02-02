@@ -7,7 +7,7 @@ import calendar
 URL = "https://data.cityofchicago.org/resource/ijzp-q8t2.json?year=2022"
 
 
-def write_json(row, columns):
+def write_json(row: list[str], columns) -> None:
     full_dict = {row[0]: {}}
     for ro, c in zip(row, columns):
         full_dict[row[0]][c] = ro
@@ -15,31 +15,28 @@ def write_json(row, columns):
         f.write(json.dumps(full_dict, indent=4))
 
 
-def write_csv(data):
-    columns = []
-    for key in data[0].keys():
-        if isinstance(data[0].get(key), dict):
-            for inner_key in data[0].get(key).keys():
-                columns.append(inner_key)
-        else:
-            columns.append(key)
+def write_csv(data) -> None:
+    columns_list = []
+    for item in data:
+        if len(item) == 22:
+            columns_list = item.keys()
+
     with open('crimes_data.csv', 'w') as file:
         writer = csv.writer(file)
-        writer.writerow(columns)
-
-        for data_row in data:
-            row = []
-            for value in data_row.values():
-                if not isinstance(value, dict):
-                    row.append(value)
+        writer.writerow(columns_list)
+        for item in data:
+            row = {}
+            for key in item.keys():
+                if key in columns_list:
+                    row[key] = item[key]
                 else:
-                    for inner_value in value.values():
-                        row.append(inner_value)
-            writer.writerow(row)
-            write_json(row, columns)
+                    row[key] = ""
+            row_values = [value for value in row.values()]
+            writer.writerow(row_values)
+            write_json(row_values, columns_list)
 
 
-def pd_write_primary_types():
+def pd_write_primary_types() -> None:
     df = pd.read_csv("crimes_data.csv")
     primary_types = df['primary_type'].unique()
     for pr_type in primary_types:
@@ -47,7 +44,7 @@ def pd_write_primary_types():
         new_df.to_csv(f"{pr_type.lower()}.csv", encoding='utf-8', index=False)
 
 
-def write_crime_for_months():
+def write_crime_for_months() -> None:
     df = pd.read_csv("crimes_data.csv", parse_dates=['date'])
     df['date'] = pd.to_datetime(df['date'])
     data_dict = {}
